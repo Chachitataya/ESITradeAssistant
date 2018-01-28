@@ -30,4 +30,5 @@ for dict_item in sorted_r:
 #Iterates through each item in the list 'sorted_r'
 #        then iterates through each 'price' key/value pair in each dictionary in said list. 
 
-#10000044 
+#TEST DATA NOTES: REGION ID USED: DOMAIN, ID 10000044 
+#ItemID used: 39 (Zydrine)
