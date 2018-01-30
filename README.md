@@ -10,11 +10,14 @@ It can also resolve locationID to a solar system or region NAME.
 ====== TO DO LIST ======
 SYSTEM Functionality:
 A) Write to database or text file (database long-term, text-file mid-term). Store static information in database.
--a1) Holyshit make sure it's normalized at database start, at least third or fifth normalization.
--a2) Static data - region/system IDs and names. 
--a3) Caching permenant data - 'If we don't have a static item, get it and permenantly store it in [table]
--a4) Caching Dynamic data that just gets refreshed every five minutes, and everything else queries the database rather than sending webrequests.
+a1) Holyshit make sure it's normalized at database start, at least third or fifth normalization.
+a2) Static data - region/system IDs and names. 
+a3) Caching permenant data - 'If we don't have a static item, get it and permenantly store it in [table]
+a4) Caching Dynamic data that just gets refreshed every five minutes, and everything else queries the database rather than sending webrequests.
+
 B) HTML/Webpage Input Functionality - make this a webapp that allows input. 
+
+PROGRAM Functionality. 
 
 I) Trade Run calculator: Compare buy/sell orders across regions, take input for ship Volume, IMPLEMENT SAFETY TOOLS ('min item checker', maybe price history analysis.)
 -i) Find items that are profitable between two systems and show margins after baseline tax, no skills. 
