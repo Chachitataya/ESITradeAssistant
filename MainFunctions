@@ -1,0 +1,131 @@
+#Basic webrequest setup for Python. 
+#As is, this sends a webrequest to esi.tech.ccp.is to the market endpoint/regionid/orders endpoint with relevant ItemID parameters, gets the sell orders, then parses that. 
+#Basically this just exists because I got sick of fraggin' powershell
+
+import urllib3
+import certifi
+import json
+import csv
+from operator import itemgetter
+#imports necessary modules. I'm almost sure this isn't good practice but whatever.
+
+https = urllib3.PoolManager(
+    cert_reqs='CERT_REQUIRED',
+    ca_certs=certifi.where())
+#establishes poolmanager and enables certificate verification for HTTPS requests. This is vital to avoid 'certificate verification' in the output.
+
+#returns a list of dictionaries from a JSON object from a webrequest based on /markets/regionID/ endpoint to find item orders. OrderType should be Buy/Sell/All
+def RequestOrderData(ItemID,RegionID,OrderType):
+	regionID = str(RegionID)
+	orderType = str(OrderType)
+	itemID = str(ItemID)
+	r = https.request('GET', 'https://esi.tech.ccp.is/latest/markets/' + regionID +'/orders/?datasource=tranquility&order_type=' + orderType + '&page=1&type_id=' + itemID)
+	loadedR = json.loads(r.data)
+    #loads JSON data to loadedR [List of Dictionaries]
+	return loadedR;
+
+#Returns a systemIDFinal string given a locationID and type of location (system, region)
+def RequestLocationInfoID(locationIdP,locationtype):
+    IDStr = str(locationIdP)
+    if (str(locationtype) == 'system'):
+        infoRequest = https.request('GET', 'https://esi.tech.ccp.is/latest/universe/stations/' + IDStr + '/?datasource=tranquility')
+        parsedInfoRequest = json.loads(infoRequest.data)
+        infoFinal = parsedInfoRequest['system_id']
+
+    if (str(locationtype) == 'constellation'):
+        infoRequest = https.request('GET', 'https://esi.tech.ccp.is/latest/universe/systems/' + IDStr)
+        parsedInfoRequest = json.loads(infoRequest.data)
+        infoFinal = parsedInfoRequest['constellation_id']
+
+    if (str(locationtype) == 'region'):
+        infoRequest = https.request('GET', 'https://esi.tech.ccp.is/latest/universe/constellations/' + IDStr + '/?datasource=tranquility')
+        parsedInfoRequest = json.loads(infoRequest.data)
+        infoFinal = parsedInfoRequest['region_id']
+    #Stored as "system_id":30003574,
+    return infoFinal;
+
+#returns Region when given LocationID, using horrible practices. Iterates RequestLocationInfoID for system, constellation, then region ID.
+def RequestRegionfromLocation(locationIDP):
+    locationPlaceholder = str(locationIDP)
+    locationTypeP = 'system'
+    regionIs = RequestLocationInfoID(locationPlaceholder,locationTypeP)
+    locationTypeP = 'constellation'
+    regionIs = RequestLocationInfoID(regionIs,locationTypeP)
+    locationTypeP = 'region'
+    regionIs = RequestLocationInfoID(regionIs,locationTypeP)
+    return regionIs;
+
+
+#Returns a sorted list of dictionaries based on Dictionary attribute
+def SortJsonData(jsoninput,sorter,pattern):
+    listtosort = jsoninput
+    sorterfunction = str(sorter)
+    if (pattern == 'desc'):
+        sortresult = sorted(listtosort, key=itemgetter(sorterfunction), reverse=True)
+    else:
+        sortresult = sorted(listtosort, key=itemgetter(sorterfunction), reverse=False)
+    return sortresult;
+    #sorts the data (parsed_r) by price. itemgetter is necessary because sorted_r is a list of dictionaries.
+
+def ResolveName(inputID,type):
+    inputID = str(inputID)
+    if (str(type) == 'system'):
+        infoRequest = https.request('GET', 'https://esi.tech.ccp.is/latest/universe/systems/' + inputID + '/?datasource=tranquility')
+        parsedInfoRequest = json.loads(infoRequest.data)
+        infoFinal = parsedInfoRequest['name']
+    if (str(type) == 'region'):
+        infoRequest = https.request('GET', 'https://esi.tech.ccp.is/latest/universe/regions/' + inputID + '/?datasource=tranquility')
+        parsedInfoRequest = json.loads(infoRequest.data)
+        infoFinal = parsedInfoRequest['name']
+    if (str(type) == 'item'):
+        infoRequest = https.request('GET', 'https://esi.tech.ccp.is/latest/universe/types/' + inputID + '/?datasource=tranquility')
+        parsedInfoRequest = json.loads(infoRequest.data)
+        infoFinal = parsedInfoRequest['name']
+    return infoFinal;
+
+marketOrder = RequestOrderData('39','10000044','sell')
+marketOrderSorted = SortJsonData(marketOrder,'price','asc')
+
+for dict_item in marketOrderSorted[0:4]:
+#        for key in dict_item:
+         regionname = RequestRegionfromLocation(dict_item['location_id'])
+         regionname = ResolveName(regionname,'region')
+         systemname = RequestLocationInfoID(dict_item['location_id'],'system')
+         systemname = ResolveName(systemname,'system')
+         itemName = ResolveName(dict_item['type_id'],'item')
+         print("Found {} units of {} at {} per count in {}, {}".format(dict_item['volume_total'],itemName,dict_item['price'],systemname,regionname))
+
+
+#=====OUTDATED BLOC INFORMATION, HISTORICAL PURPOSES ONLY
+#Test of RequestSystemID function - gets system from location ID
+#locID = '60011950'
+#sysID = RequestLocationInfoID(locID,'system')
+#print(sysID)
+#constID = RequestLocationInfoID(sysID,'constellation')
+#print(constID)
+#regID = RequestLocationInfoID(constID,'region')
+#print(regID)
+
+#Test of ResolveName function
+#RegionIsThis = ResolveName(regID,'region')
+#SystemIsThis = ResolveName(sysID,'system')
+#print("{} in {}".format(SystemIsThis,RegionIsThis))
+
+#parsed_r = RequestOrderData('39','10000044','sell')
+
+#parsed_r = json.loads(r.data)
+#Saving it to the variable here makes it a list of dictionaries.
+#sorted_r = SortJsonData(parsed_r,'price','asc')
+
+#TEMPORARY COMMENT-OUT
+#newArray = []
+#for dict_item in sorted_r:
+#    for key in dict_item:
+#        #print("{},{}".format(dict_item['price'],dict_item['location_id']))
+#        newArray.append(dict_item['price'])
+#        print('{}\n'.format(dict_item['price']))
+
+
+#TEST DATA NOTES: REGION ID USED: SOLITUDE, ID 10000044 
+#ItemID used: 39 (Zydrine)
+#Note to self: Refactor to used a list of saved IDs that it parses from, or otherwise build a database. From this, everything else is accessible. 
