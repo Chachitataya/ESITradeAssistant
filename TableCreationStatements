@@ -1,1 +1,30 @@
 //SQL Database Table Creation Statements derived from CCP's JSON arrays for the purposes of storing/caching info. 
+
+CREATE TABLE region(
+region_id VARCHAR(8) NOT NULL,
+region_name VARCHAR(20) NOT NULL,
+PRIMARY KEY (region_id)
+)
+CREATE TABLE constellation(
+constellation_id VARCHAR(8),
+region_id VARCHAR(8),
+constellation_name VARCHAR(20),
+PRIMARY KEY (constellation_id),
+FOREIGN KEY (region_id) REFERENCES region(region_id)
+)
+CREATE TABLE solar_system(
+solar_system_id VARCHAR(8),
+constellation_id VARCHAR(8),
+star_id VarChar(8),
+system_name VARCHAR(20),
+security_status DECIMAL(20),
+security_class VARCHAR(2)
+foreign key (constellation_id) REFERENCES constellation(constellation_id)
+)
+
+CREATE TABLE station(
+station_id VARCHAR(8),
+station_name VARCHAR(100),
+ID_type VARCHAR(8),
+solar_system_id VARCHAR(8)
+)
