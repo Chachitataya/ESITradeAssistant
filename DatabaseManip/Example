@@ -1,0 +1,25 @@
+#Example file to execute SQL commands from Python
+#Now we're cooking with fire!
+
+import urllib3
+import certifi
+import json
+import csv
+import pypyodbc
+from operator import itemgetter
+
+#Establish connection using driver, server, database, and login info.
+#Obviously login information is obscured here. 
+connection = pypyodbc.connect('Driver={SQL Server};'
+                                'Server=[DOMAIN/SERVERNAME];'
+                                'Database=[DATABASENAME];'
+                                'uid=*****;pwd=*****')
+                                
+#Gotta build a cursor, pass the cursor a SQL command, execute the [object].execute(variable) command
+#Save the results, print results, close connection. Aw yeah. 
+cursor = connection.cursor() 
+SQLCOMMAND = "SELECT * FROM REGION"
+cursor.execute(SQLCOMMAND)
+RESULTS = cursor.fetchone()
+print(RESULTS)
+connection.close()
