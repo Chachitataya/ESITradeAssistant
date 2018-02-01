@@ -30,14 +30,27 @@ ID_type VARCHAR(8),
 solar_system_id VARCHAR(8),
 reprocessing_efficiency decimal(3),
 reprocessing_take decimal(3),
+who_owns_corp VARCHAR(50)
 PRIMARY KEY (station_id),
 foreign key (solar_system_id) REFERENCES solar_system(solar_system_id)
 )
-CREATE TABLE resolve_item(
-item_id (8)
-item_name (30)
+CREATE TABLE item_values(
+item_id VARCHAR(6),
+item_name VARCHAR(100),
+item_volume bigint,
 )
 CREATE TABLE market_orders(
-order_id,
-location_id
-item_id
+order_id varchar(10),
+location_id varchar(8),
+item_id varchar(6),
+volume_total BIGINT,
+volume_remain BIGINT,
+min_volume bigint,
+is_buy_order bit,
+duration smallint,
+issued date,
+price MONEY,
+date_issued smalldatetime
+CHECK (is_buy_order = 0 or is_buy_order = 1),
+
+)
