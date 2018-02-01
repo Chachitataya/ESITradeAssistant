@@ -19,6 +19,7 @@ star_id VarChar(8),
 system_name VARCHAR(20),
 security_status DECIMAL(20),
 security_class VARCHAR(2)
+PRIMARY KEY (solar_system_id)
 foreign key (constellation_id) REFERENCES constellation(constellation_id)
 )
 
@@ -26,5 +27,17 @@ CREATE TABLE station(
 station_id VARCHAR(8),
 station_name VARCHAR(100),
 ID_type VARCHAR(8),
-solar_system_id VARCHAR(8)
+solar_system_id VARCHAR(8),
+reprocessing_efficiency decimal(3),
+reprocessing_take decimal(3),
+PRIMARY KEY (station_id),
+foreign key (solar_system_id) REFERENCES solar_system(solar_system_id)
 )
+CREATE TABLE resolve_item(
+item_id (8)
+item_name (30)
+)
+CREATE TABLE market_orders(
+order_id,
+location_id
+item_id
