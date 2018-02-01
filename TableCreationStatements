@@ -1,5 +1,3 @@
-//SQL Database Table Creation Statements derived from CCP's JSON arrays for the purposes of storing/caching info. 
-
 CREATE TABLE region(
 region_id VARCHAR(8) NOT NULL,
 region_name VARCHAR(20) NOT NULL,
@@ -38,6 +36,7 @@ CREATE TABLE item_values(
 item_id VARCHAR(6),
 item_name VARCHAR(100),
 item_volume bigint,
+PRIMARY KEY (item_id)
 )
 CREATE TABLE market_orders(
 order_id varchar(10),
@@ -48,9 +47,10 @@ volume_remain BIGINT,
 min_volume bigint,
 is_buy_order bit,
 duration smallint,
-issued date,
 price MONEY,
 date_issued smalldatetime
+primary key (order_id)
+FOREIGN KEY (location_id) REFERENCES station(station_id)
 CHECK (is_buy_order = 0 or is_buy_order = 1),
 
 )
