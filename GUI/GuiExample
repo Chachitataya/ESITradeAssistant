@@ -1,0 +1,23 @@
+#How to use TKINTER to update a label via buttonpress:
+#It has some junk. 
+
+from tkinter import *
+
+rootwindow = Tk()
+rootwindow.geometry('300x300')
+
+def changeButton():
+    print("rawr")
+    newtext = "rawr"
+    labelnew.config(text=newtext)
+
+topframe = Frame(rootwindow)
+topframe.pack()
+
+button1 = Button(topframe, text="whateverclickme", command=changeButton)
+labelnew = Label(rootwindow, text="OHYEAAAAAH")
+
+button1.pack(side=LEFT)
+
+labelnew.pack()
+rootwindow.mainloop()
