@@ -1,0 +1,49 @@
+
+TOP-LEVEL SETTINGS:
+
+Refresh
+Close
+
+
+Side-By-Side ItemProfit Lookup
+[ITEM]
+
+
+SYSTEM: [SELLBottom5]		[BUYTop5]
+
+SYSTEM: [SELLBottom5]		[BUYTop5]
+
+SYSTEM: [SELLBottom5]		[BUYTop5]
+
+SYSTEM: [SELLBottom5]		[BUYTop5]
+
+
+STRONGSELL
+[ITEM]
+HighestMinSell
+HighestAverageSell
+-WeightOption: Volume || Count || Top X Orders-
+
+CHEAPBUY
+[ITEM]
+LowestMaxBuy
+LowestAverageBuy
+-WeightOption: Volume || Count || Top X orders-
+
+RECOMMENDED-ITEMS
+SetVolume (Should always match size of base hauler)
+SetMaxRisk (Value of Goods not to exceed X cost)
+Most Profit % || Most Profit ISK
+(Region1's) (Item) (Region2Count) Sells to (MaxPrice Region2) (TransactVolume)
+
+
+===========
+Rules for Trade Circuit: 
+A -> B -> C -> D -> A must be minimized and highsec (figure this out yourself)
+
+TradeCircuit
+(Backlogic)
+FIND ITEMS IN SYSTEM A AND SYSTEM B
+	COMPARE itemsA.Sell[ItemID] to
+
+
