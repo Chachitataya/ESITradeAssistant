@@ -1,0 +1,203 @@
+#-------------------------------------------------------------------------------
+# Name:        module1
+# Purpose:
+#
+# Author:      Kieltal
+#
+# Created:     19/06/2018
+# Copyright:   (c) Kieltal 2018
+# Licence:     <your licence>
+#-------------------------------------------------------------------------------
+
+import sqlite3
+import fnmatch
+from tkinter import *
+from tkinter.ttk import *
+import DBM
+
+class OverallGui:
+    def __init__(self,master):
+        self.master = master
+        regionsIn = ['Amarr','Jita','Hek','Rens','Dodixie']
+        itemsIn = ['Tritanium']
+
+        master.title("Consultant")
+
+        notebookpage = Notebook(master)
+        notebookpage.grid(row=6,column=0,columnspan=20,rowspan=20,sticky='NESW')
+        page1 = Frame(notebookpage)
+        notebookpage.add(page1, text="Intersystem Trade")
+
+        page2 = Frame(notebookpage)
+        notebookpage.add(page2, text="Station Trading")
+
+        page3 = Frame(notebookpage)
+        notebookpage.add(page3, text="Arbitrage")
+
+        #self.label = Label(master, text="This is our first GUI!")
+        #self.label.grid(row=1)
+        self.labelHeader1 = Label(master, text="").grid(row=0, column=0)
+        self.labelHeader2 = Label(master, text="").grid(row=0, column=2)
+        self.labelHeader3 = Label(master, text="").grid(row=0, column=4)
+
+        self.Tab1Header1 = Label(page1, text="").grid(row=0, column=0)
+        self.Tab1Header2 = Label(page1, text="").grid(row=0, column=2)
+        self.Tab1Header3 = Label(page1, text="").grid(row=0, column=4)
+
+        self.Tab1Header4 = Label(page2, text="").grid(row=0, column=0)
+        self.Tab1Header5 = Label(page2, text="").grid(row=0, column=2)
+        self.Tab1Header6 = Label(page2, text="").grid(row=0, column=4)
+
+        self.Tab1Header7 = Label(page3, text="").grid(row=0, column=0)
+        self.Tab1Header8 = Label(page3, text="").grid(row=0, column=2)
+        self.Tab1Header9 = Label(page3, text="").grid(row=0, column=4)
+
+        #self.greet_button = Button(master, text="greet", command=self.greet).grid(row=1, column=0)
+        #self.greet_button.grid(row=2)
+        self.close_button = Button(master, text="close", command=root.destroy).grid(row=0, column = 8)
+        #self.close_button.grid(row=3)
+
+        self.Spacer1 = Label(master, text="").grid(row=0, column=1, padx=50)
+        self.Spacer2 = Label(page1, text="").grid(row=0, column=1, padx=50)
+        self.Spacer3 = Label(page2, text="").grid(row=0, column=1, padx=50)
+        #self.Spacer2 = Label(master, text="").grid(row=0, column=3, padx=50)
+        #self.Spacer3 = Label(master, text="").grid(row=0, column=5, padx=50)
+
+        #self.listbox1 = Listbox(master)
+        #self.listbox1.config(border=2,relief=SUNKEN)
+        #self.listbox1.grid(row=6, column=0)
+
+
+        #notebookpage = Notebook(master)
+        #notebookpage.grid(row=6,column=0,columnspan=26,rowspan=19,sticky='NESW')
+        #page1 = Frame(notebookpage)
+        #notebookpage.add(page1, text="FirstThing")
+
+        #page2 = Frame(notebookpage)
+        #notebookpage.add(page2, text="SecondThing")
+
+
+
+        #Machine recognizes this as .!combobox
+        self.itempick = Combobox(page1)
+        self.itempick['values']=itemsIn
+        self.itempick.grid(row=0,column=1)
+        self.itempick.bind("<<ComboboxSelected>>",self.selectMethod)
+
+        #Machine recognizes this as .!combobox2
+        self.combobox1 = Combobox(page1)
+        self.combobox1.grid(row=1, column=1)
+        self.combobox1['values']=regionsIn
+        self.combobox1.bind("<<ComboboxSelected>>",self.selectMethod)
+
+        #Machine recognizes this as .!combobox3
+        self.combobox2 = Combobox(page1)
+        self.combobox2.grid(row=2, column=1)
+        self.combobox2['values']=regionsIn
+        self.combobox2.bind("<<ComboboxSelected>>",self.selectMethod)
+
+        self.newtreesell = Treeview(page1)
+        self.newtreesell["columns"]=("one","two","three")
+        self.newtreesell.grid(row=1, column = 3)
+        self.newtreesell.column("one")
+        self.newtreesell.heading("one", text="Station")
+        self.newtreesell.column("two")
+        self.newtreesell.heading("two", text="Price")
+        self.newtreesell.column("three")
+        self.newtreesell.heading("three", text="Volume")
+        self.newtreesell['show'] = 'headings'
+
+        self.newtreebuy = Treeview(page1)
+        self.newtreebuy["columns"]=("one","two","three")
+        self.newtreebuy.grid(row=2, column = 3)
+        self.newtreebuy.column("one")
+        self.newtreebuy.heading("one", text="Station")
+        self.newtreebuy.column("two")
+        self.newtreebuy.heading("two", text="Price")
+        self.newtreebuy.column("three")
+        self.newtreebuy.heading("three", text="Volume")
+        self.newtreebuy['show'] = 'headings'
+
+
+
+        self.newtreesell.insert('','end',text='yes', values=('1','1','1'))
+        self.newtreesell.insert('','end',text='yes', values=('1','1','1'))
+        self.newtreebuy.insert('','end',text='yes', values=('1','1','1'))
+        self.newtreebuy.insert('','end',text='yes', values=('1','1','1'))
+        self.newtreebuy.insert('','end',text='yes', values=('1','1','1'))
+
+    #--------------------- Methods ----------------- #
+
+    def selectMethod(self, picked):
+        print("Done ")
+        eventWidget = str(picked.widget)
+        pickedValue = str(picked.widget.get())
+        #print(picked.widget)
+        #print(eventWidget)
+        self.ChangeData(eventWidget, pickedValue)
+        #print(self.combobox1.get())
+        #print(eventWidget + ' ' + pickedValue)
+
+
+    def ChangeData(self, widgetupdated, newvalue):
+        getConnector = sqlite3.connect('TraderDatabase.db')
+        getCursor = getConnector.cursor()
+        if fnmatch.fnmatch(widgetupdated, '*!combobox'):
+            print('yes')
+            #getCursor.execute(Select *)
+            #ToDo: Update both treeviews with select * from database for that item
+            #self.newtreesell.delete(self.newtreesell.get_children())
+            x = self.newtreesell.get_children()
+            for item in x:
+                self.newtreesell.delete(item)
+
+            #self.newtreebuy.delete(self.newtreebuy.get_children())
+            x = self.newtreebuy.get_children()
+            for item in x:
+                self.newtreebuy.delete(item)
+
+            #Sell Order Refresh
+            getCursor.execute("Select * from market_orders where is_buy_order == 0 ")
+            resultsSell = getCursor.fetchall()
+            for item in resultsSell:
+                print(item[0])
+
+            #Buy Order Refresh
+            getCursor.execute("Select * from market_orders where is_buy_order == 1")
+            resultsBuy = getCursor.fetchall()
+            for item in resultsBuy:
+                self.newtreesell.insert('','end',text='yes', values=(str(item),'1','1'))
+
+
+
+
+
+
+        if fnmatch.fnmatch(widgetupdated, '*!combobox2'):
+            print('Sell Selected')
+            x = self.newtreesell.get_children()
+            for item in x:
+                self.newtreesell.delete(item)
+        if fnmatch.fnmatch(widgetupdated, '*!combobox3'):
+            print ('Buy Selected')
+            x = self.newtreebuy.get_children()
+            for item in x:
+                self.newtreebuy.delete(item)
+
+
+
+
+
+
+
+
+
+
+    def greet(self):
+            print("Greetings!")
+
+
+root = Tk()
+my_gui = OverallGui(root)
+root.mainloop()
+
