@@ -1,0 +1,142 @@
+#-------------------------------------------------------------------------------
+# Name:        module1
+# Purpose:
+#
+# Author:      Kieltal
+#
+# Created:     08/07/2018
+# Copyright:   (c) Kieltal 2018
+# Licence:     <your licence>
+#-------------------------------------------------------------------------------
+
+import os
+import sqlite3
+import urllib3
+import certifi
+import json
+
+def BuildDatabase():
+    db_is_here = os.path.exists('TraderDatabase.db')
+    if db_is_here:
+        print('Database Already Exists.')
+    elif db_is_here == False:
+        conn = sqlite3.connect('TraderDatabase.db')
+        create = conn.cursor()
+        conn.close()
+        BuildTables()
+        print('done')
+
+
+
+
+def DeleteDatabase():
+    db_is_here = os.path.exists('TraderDatabase.db')
+    db_test_here = os.path.exists('example.db')
+    if db_is_here:
+        os.remove('TraderDatabase.db')
+        if db_is_here:
+            print('Error removing example.db')
+        else:
+            print ('DB removed: example.db')
+    elif db_test_here:
+        os.remove('example.db')
+        if db_test_here:
+            print('Error removing example.db')
+        else:
+            print ('DB removed: example.db')
+    else:
+        print('???')
+
+def RefreshDatabase():
+    print('Database Refreshed')
+
+def BuildTables():
+    conn = sqlite3.connect('TraderDatabase.db')
+    create = conn.cursor()
+
+    create.execute('CREATE TABLE region(region_id VARCHAR(8) NOT NULL,region_name VARCHAR(20) NOT NULL,PRIMARY KEY (region_id))')
+    conn.commit()
+    create.execute('CREATE TABLE constellation(constellation_id VARCHAR(8), region_id VARCHAR(8), constellation_name VARCHAR(20), PRIMARY KEY (constellation_id), FOREIGN KEY (region_id) REFERENCES region(region_id) )')
+    conn.commit()
+    create.execute('CREATE TABLE solar_system(solar_system_id VARCHAR(8), constellation_id VARCHAR(8), star_id VarChar(8), system_name VARCHAR(20), security_status DECIMAL(20), security_class VARCHAR(2), PRIMARY KEY (solar_system_id), foreign key (constellation_id) REFERENCES constellation(constellation_id) )')
+    conn.commit()
+    create.execute('CREATE TABLE station(station_id VARCHAR(8), station_name VARCHAR(100), ID_type VARCHAR(8), solar_system_id VARCHAR(8), reprocessing_efficiency decimal(3), reprocessing_take decimal(3), who_owns_corp VARCHAR(50), PRIMARY KEY (station_id), foreign key (solar_system_id) REFERENCES solar_system(solar_system_id) )')
+    conn.commit()
+    create.execute('CREATE TABLE item_values(item_id VARCHAR(6), item_name VARCHAR(100), item_volume bigint, PRIMARY KEY (item_id) )')
+    conn.commit()
+    create.execute('CREATE TABLE market_orders(order_id varchar(10), location_id varchar(8), item_id varchar(6), volume_total BIGINT, volume_remain BIGINT, min_volume bigint, is_buy_order bit, duration smallint, price MONEY, date_issued date, primary key (order_id), FOREIGN KEY (location_id) REFERENCES station(station_id), CHECK (is_buy_order = 0 or is_buy_order = 1) )')
+    conn.commit()
+    conn.close()
+
+#def InsertMarketData(order_id,location_id,item_id,volume_total,volume_remain,min_volume,is_buy_order,duration,price,issued):
+
+
+    #create.execute('INSERT INTO market_orders VALUES (' + str(order_id) + ',' + str(location_id) + ',' + str(item_id) + ',' + str(volume_total) + ',' + str(volume_remain) + ',' + str(min_volume) + ',' + str(is_buy_order) + ',' + str(duration) + ',' + str(price) +',' + str(issued) + ')')
+
+
+
+#def GetStaticData():
+#    https = urllib3.PoolManager(
+#    cert_reqs='CERT_REQUIRED',
+#    ca_certs=certifi.where())
+    #establishes poolmanager and enables certificate verification for HTTPS requests. This is vital to avoid 'certificate verification' in the output.
+
+def RequestOrderData(ItemID,RegionID,OrderType):
+    regionID = str(RegionID)
+    orderType = str(OrderType)
+    itemID = str(ItemID)
+
+    #connect to 'database'
+    conn = sqlite3.connect('TraderDatabase.db')
+    create = conn.cursor()
+
+    r = https.request('GET', 'https://esi.tech.ccp.is/latest/markets/' + regionID + '/orders/?datasource=tranquility&order_type=' + orderType + '&page=1&type_id=' + itemID)
+    loadedR = json.loads(r.data)
+    for x in loadedR:
+        #y = loadedR[x]
+        if x['min_volume'] == 1:
+            #print(x['min_volume'])
+            #print(x['order_id'])
+            #print(x['location_id'])
+            #print(x['volume_total'])
+            #print(x['volume_remain'])
+            #print(x['is_buy_order'])
+            #print(x['duration'])
+            #print(x['price'])
+            #print(x['issued'])
+
+            #x[order_id]
+            #x[location_id]
+            #x[item_id]
+            #x[volume_total]
+            #x[volume_remain]
+            #x[min_volume]
+            #x[is_buy_order]
+            #x[duration]
+            #x[price]
+            #x[issued]
+            create.execute("""INSERT INTO market_orders(order_id,location_id,item_id,volume_total,volume_remain,min_volume,is_buy_order,duration,price,date_issued) VALUES(?,?,?,?,?,?,?,?,?,?);""",(x['order_id'],x['location_id'],x['type_id'],x['volume_total'],x['volume_remain'],x['min_volume'],x['is_buy_order'],x['duration'],x['price'],x['issued']))
+            conn.commit()
+    create.execute("""SELECT * FROM market_orders""")
+    print(create.fetchall())
+    conn.close()
+
+
+
+#Data for Testing:   RequestOrderData('39','10000044','sell')
+#Testing - Delete when done)
+
+DeleteDatabase()
+BuildDatabase()
+#conn = sqlite3.connect('TraderDatabase.db')
+#cursor = conn.cursor()
+#cursor.execute("'Insert into region ('')'")
+#cursor.execute('Select * from ')
+
+#add this SOMEWHERE
+https = urllib3.PoolManager(
+    cert_reqs='CERT_REQUIRED',
+    ca_certs=certifi.where())
+
+
+RequestOrderData('39','10000044','sell')
